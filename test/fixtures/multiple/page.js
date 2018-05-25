@@ -1,6 +1,6 @@
 /* eslint no-console: off */
 
-require('./component');
+console.log('page module');
 
 if (typeof module.hot === 'object') {
   module.hot.accept((err) => {

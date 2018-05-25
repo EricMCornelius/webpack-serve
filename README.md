@@ -33,8 +33,6 @@ To begin, you'll need to install `webpack-serve`:
 $ npm install webpack-serve --save-dev
 ```
 
-_Note: This module is still green and should be considered unstable._
-
 ## CLI
 
 ```console
@@ -124,14 +122,14 @@ can be useful for setups with multiple configs that share common options for
 `webpack-serve` supports the `serve` property in your webpack config file, which
 may contain any of the supported [options](#options).
 
-## Webpack `function()` Configs
+### Setting the Config `mode`
 
-Due to some special preprocessing that is part of `webpack-cli`, and not `webpack`
-proper, `webpack-serve` cannot fully support configs that export a function without
-creating a bit of a mess. We're working on a solution for this, but for the
-moment we don't recommend using `webpack-serve` with configs that export a
-`function()`. If you must use this type of config, we recommend stubbing the
-values you'll need for a development environment.
+Should you find that the `mode` property of your webpack config file needs to be
+set dynamically the following pattern can be used:
+
+```json
+  mode: process.env.WEBPACK_SERVE ? 'development' : 'production',
+```
 
 ## API
 
@@ -325,22 +323,61 @@ The port the server should listen on.
 
 ## Events
 
-The server created by `webpack-serve` emits select events which can be subscribed to. For example;
+The server created by `webpack-serve` emits select events which can be
+subscribed to. All events are emitted with a single `Object` parameter,
+containing named properties for relevant data.
+
+For example:
 
 ```js
 const serve = require('webpack-serve');
 const config = require('./webpack.config.js');
 
 serve({ config }).then((server) => {
-  server.on('listening', () => {
+  server.on('listening', ({ server, options }) => {
     console.log('happy fun time');
   });
 });
 ```
 
+#### build-started
+
+Arguments:  
+  [`Compiler`](https://webpack.js.org/api/node/#compiler-instance) _compiler_
+
+Emitted when a compiler has started a build.
+
+#### build-finished
+
+Arguments:  
+  [`Stats`](https://webpack.js.org/api/node/#stats-object) _stats_  
+  [`Compiler`](https://webpack.js.org/api/node/#compiler-instance) _compiler_
+
+Emitted when a compiler has finished a build.
+
+#### compile-error
+
+Arguments:  
+  [`Stats`](https://webpack.js.org/api/node/#stats-tojson-options-) _json_
+  [`Compiler`](https://webpack.js.org/api/node/#compiler-instance) _compiler_
+
+Emitted when a compiler has encountered and error, or a build has errors.
+
+#### compile-warning
+
+Arguments:  
+  [`Stats`](https://webpack.js.org/api/node/#stats-tojson-options-) _json_
+  [`Compiler`](https://webpack.js.org/api/node/#compiler-instance) _compiler_
+
+Emitted when a compiler has encountered a warning, or a build has warnings.
+
 #### listening
 
-Arguments: _None_
+Arguments:  
+  `Koa` _server_  
+  `Object` _options_
+
+Emitted when the server begins listening for connections.
 
 ## Add-on Features
 
@@ -393,9 +430,19 @@ Listed below are some of the add-on patterns and recipes that can be found in
 - [historyApiFallback](docs/addons/history-fallback.config.js)
 - [proxy + history fallback](docs/addons/proxy-history-fallback.config.js)
 - [proxy + router](docs/addons/proxy-router.config.js)
+- [reuse Chrome tab](docs/addons/reuse-chrome-tab)
 - [staticOptions](docs/addons/static-content-options.config.js)
 - [useLocalIp](docs/addons/local-ip.config.js)
 - [watch content](docs/addons/watch-content.config.js)
+
+### Community Add-ons
+
+_Note: The list below contains `webpack-serve` add-ons created by the community.
+Inclusion in the list does not imply a module is preferred or recommended
+over others._
+
+- [webpack-serve-waitpage](https://github.com/elisherer/webpack-serve-waitpage):
+Displays build progress in the client during complilation.
 
 ## Contributing
 
